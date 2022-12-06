@@ -3,6 +3,9 @@ import os
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
+from PyQt5.uic.properties import QtWidgets
+from screeninfo import get_monitors
+
 
 
 def submit(actionBox, pathButton, projectBox, vmhostBox, startBox, configureBox):
@@ -51,8 +54,10 @@ def main():
     with open(stylesheet, "r") as fh:
         app.setStyleSheet(fh.read())
     window = QWidget()
-    window.setMinimumSize(1000, 720)
+    window.setMinimumSize(int(0.4*screens[0].width), int(0.65*screens[0].height))
+    window.resize(int(0.55*screens[0].width), int(0.67*screens[0].height))
     window.setWindowTitle("GNScript")
+
     p = QPalette()
     gradient = QLinearGradient(0, 0, 0, 720)
     gradient.setColorAt(0.0, QColor(118, 60, 188))
@@ -65,7 +70,7 @@ def main():
     # vBoxCanvas.setContentsMargins(0,0,0,0)
 
     whiteCanvas = QWidget(objectName="whiteCanvas")
-    whiteCanvas.setFixedSize(630,590)
+    whiteCanvas.setFixedSize(int(0.33*screens.__getitem__(0).width), int(0.55*screens.__getitem__(0).height))
     whiteCanvasShadow = QGraphicsDropShadowEffect(objectName="whiteCanvasShadow")
     whiteCanvasShadow.setXOffset(0)
     whiteCanvasShadow.setYOffset(0)
