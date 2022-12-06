@@ -8,7 +8,6 @@
 	font-weight: bold
 }
 
-
 QComboBox#actionBox { 
 	background-color: #e6e6e6; 
 	border-radius: 5px; 
@@ -16,15 +15,15 @@ QComboBox#actionBox {
 } 
 
 QComboBox#actionBox::drop-down { 
-	border: 0px 
-	
+	border: 0
+
 } 
 
 QComboBox#actionBox::down-arrow { 
 	image: url(./arrow.ico);
 	width: 12px; 
 	margin-right: 5px; 
-	border: 0px
+	border: 0
 }
 
 #pathButton {
@@ -44,6 +43,10 @@ QComboBox#actionBox::down-arrow {
 	color: white; 
 	height: 35px; 
 	border-radius:7px
+}
+
+#submitButton:hover {
+	background-color: #808080;
 }
 
 
