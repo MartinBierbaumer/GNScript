@@ -7,10 +7,10 @@ from PyQt5.QtCore import *
 
 
 def submit(actionBox, pathButton, projectBox, vmhostBox, startBox, configureBox):
-    args = "-"+actionBox.currentText().lower()
-    args += " \""+pathButton.text()+"\""
-    args += " -project "+projectBox.toPlainText()
-    args += " -vmhost "+vmhostBox.toPlainText()
+    args = "-" + actionBox.currentText().lower()
+    args += " \"" + pathButton.text() + "\""
+    args += " -project " + projectBox.toPlainText()
+    args += " -vmhost " + vmhostBox.toPlainText()
     if startBox.isChecked():
         args += " -start"
 
@@ -48,6 +48,9 @@ def resetPath(pathButton):
 
 def main():
     app = QApplication([])
+    stylesheet = "./stylesheet.css"
+    with open(stylesheet, "r") as fh:
+        app.setStyleSheet(fh.read())
     window = QWidget()
     window.setMinimumSize(1000, 720)
     window.setWindowTitle("GNScript")
@@ -58,44 +61,39 @@ def main():
     p.setBrush(QPalette.Window, QBrush(gradient))
     window.setPalette(p)
 
-    vBoxCanvas = QVBoxLayout()
+    vBoxCanvas = QVBoxLayout(objectName="vBoxCanvas")
     vBoxCanvas.setAlignment(Qt.AlignCenter)
     # vBoxCanvas.setContentsMargins(0,0,0,0)
 
-    whiteCanvas = QWidget()
+    whiteCanvas = QWidget(objectName="whiteCanvas")
     whiteCanvas.setFixedSize(630,590)
-    whiteCanvas.setStyleSheet("background-color: white; border-radius: 30px")
-    whiteCanvasShadow = QGraphicsDropShadowEffect()
+    whiteCanvasShadow = QGraphicsDropShadowEffect(objectName="whiteCanvasShadow")
     whiteCanvasShadow.setXOffset(0)
     whiteCanvasShadow.setYOffset(0)
     whiteCanvasShadow.setBlurRadius(100)
     whiteCanvas.setGraphicsEffect(whiteCanvasShadow)
 
-    welcomeLabel = QLabel("GNScript")
-    actionLabel = QLabel("ACTION")
-    pathLabel = QLabel("PATH")
-    projectLabel = QLabel("PROJECT")
-    vmhostLabel = QLabel("VMHOST")
+    welcomeLabel = QLabel("GNScript", objectName="welcomeLabel")
+    actionLabel = QLabel("ACTION", objectName="actionLabel")
+    pathLabel = QLabel("PATH", objectName="pathLabel")
+    projectLabel = QLabel("PROJECT", objectName="projectLabel")
+    vmhostLabel = QLabel("VMHOST", objectName="vmhostLabel")
 
-    welcomeLabel.setStyleSheet("font-size: 45px; font-weight: bold")
-    actionBox = QComboBox()
+    actionBox = QComboBox(objectName="actionBox")
     actionBox.addItems(["Load","Save"])
-    actionBox.setStyleSheet("* { border-radius: 0 } QComboBox { background-color: #e6e6e6; border-radius: 5px; height: 27px } QComboBox::drop-down { border: 0px } QComboBox::down-arrow { image: url(C:/Users/maxin/PycharmProjects/pythonProject/arrow.ico); width: 12px; margin-right: 5px; border: 0px }")
-    pathButton = QPushButton("...")
-    pathButton.setStyleSheet("background-color: #e6e6e6; border-radius: 5px; height: 25px")
-    projectBox = QTextEdit()
-    projectBox.setStyleSheet("background-color: #e6e6e6; border-radius: 5px")
+    pathButton = QPushButton("...",objectName="pathButton")
+    projectBox = QTextEdit(objectName="projectBox")
     projectBox.setFixedHeight(25)
-    vmhostBox = QTextEdit()
-    vmhostBox.setStyleSheet("background-color: #e6e6e6; border-radius: 5px")
+    vmhostBox = QTextEdit(objectName="vmhostBox")
     vmhostBox.setFixedHeight(25)
 
-    startBox = QCheckBox("Start Nodes")
-    configureBox = QCheckBox("Configure Nodes")
+    startBox = QCheckBox("Start Nodes", objectName="startBox")
+    configureBox = QCheckBox("Configure Nodes", objectName="configureBox")
     configureBox.setDisabled(True)
 
-    submitButton = QPushButton("Submit")
-    submitButton.setStyleSheet("text-align: center; background-color: #464646; color: white; height: 35px; border-radius:7px;")
+    verticalSpacer = QSpacerItem(0, 0, QSizePolicy.Minimum, QSizePolicy.MinimumExpanding)
+
+    submitButton = QPushButton("Submit",objectName="submitButton")
 
     vBoxContent = QVBoxLayout()
     vBoxContent.addWidget(welcomeLabel)
@@ -109,11 +107,13 @@ def main():
     vBoxContent.addWidget(vmhostBox)
     vBoxContent.addWidget(startBox)
     vBoxContent.addWidget(configureBox)
+    vBoxContent.addItem(verticalSpacer)
     vBoxContent.addWidget(submitButton)
-    vBoxContent.setContentsMargins(20,50,20,100)
+    vBoxContent.setContentsMargins(30,50,30,30)
+    vBoxContent.setSpacing(10)
 
     vBoxCanvas.addWidget(whiteCanvas)
-
+    whiteCanvas.setFont(QFont("Arial"))
     whiteCanvas.setLayout(vBoxContent)
 
     pathButton.clicked.connect(lambda: openPath(actionBox,pathButton))

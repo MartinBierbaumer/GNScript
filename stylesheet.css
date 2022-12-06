@@ -1,0 +1,54 @@
+#whiteCanvas {
+	background-color: white; 
+	border-radius: 30px
+}
+
+#welcomeLabel {
+	font-size: 45px; 
+	font-weight: bold
+}
+
+
+QComboBox#actionBox { 
+	background-color: #e6e6e6; 
+	border-radius: 5px; 
+	height: 27px 
+} 
+
+QComboBox#actionBox::drop-down { 
+	border: 0px 
+	
+} 
+
+QComboBox#actionBox::down-arrow { 
+	image: url(./arrow.ico);
+	width: 12px; 
+	margin-right: 5px; 
+	border: 0px
+}
+
+#pathButton {
+	background-color: #e6e6e6; 
+	border-radius: 5px; 
+	height: 25px
+}
+
+#vmhostBox, #projectBox {
+	background-color: #e6e6e6; 
+	border-radius: 5px
+}
+
+#submitButton {
+	text-align: center; 
+	background-color: #464646; 
+	color: white; 
+	height: 35px; 
+	border-radius:7px
+}
+
+
+
+
+
+
+
