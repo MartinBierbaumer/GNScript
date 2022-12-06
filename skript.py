@@ -1,12 +1,10 @@
 import telnetlib
 import requests
 import time
-import sys
 import threading
 import os
-import json
-import re
 import argparse
+import json
 
 
 def getProjectEndpoint(host="localhost", port="3080", projectName=None):
@@ -19,14 +17,11 @@ def getProjectEndpoint(host="localhost", port="3080", projectName=None):
             projectID = project["project_id"]
     return endPoint + "/" + projectID
 
-def getDevices(projectEndpoint, verbose=False):
+def getDevices(projectEndpoint):
     """returns an iterator over all devices with the GNS-API-device information"""
     
     r = requests.get(projectEndpoint + "/nodes")
-    for device in r.json():
-        if (verbose):
-            print(device['name'], device['properties']['hda_disk_image_md5sum'])
-        yield device
+    return r.json()
 
 def getKonfig(telnet, switch=True):
     """retrieves the konfig and return it as a string"""
@@ -76,8 +71,7 @@ def savePhysical(vmhost, projectEndpoint, path):
     #TODO: implement
 
     with open(path + "/konfig.konf", "w") as file:
-        for device in getDevices(projectEndpoint):
-            file.write("")
+        file.write(json.dumps(getDevices(projectEndpoint)))
 
 def save(vmhost, projectName, path):
     """saves a GNS-project"""
@@ -92,6 +86,14 @@ def save(vmhost, projectName, path):
 
 
 
+def load(vmhost, projectName, path):
+    with open(path, "r") as json_file:
+        data = json.load(json_file)
+    for device in data:
+        print(device)
+
+
+
 
 parser = argparse.ArgumentParser(prog="GNScript", description="retrieves config-skripts from GNS")
 parser.add_argument('-save', help="saves the configuration and stores it")
@@ -103,4 +105,4 @@ args = parser.parse_args()
 if args.save != None:
     save(args.vmhost, args.project, args.save)
 if args.load != None:
-    load(args.load)
+    load(args.vmhost, args.project, args.load)

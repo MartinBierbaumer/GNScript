@@ -1,7 +1,5 @@
 import sys
 import os
-import threading
-import ipaddress
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
@@ -21,23 +19,8 @@ def submit(actionBox, pathButton, projectBox, vmhostBox, startBox, configureBox)
     os.system("python3 ./skript.py " + args)
 
 
-def checkSubmit(actionBox, pathButton, projectBox, vmhostBox, startBox, configureBox):
-    try:
-        address = ipaddress.ip_address(vmhostBox.toPlainText())
-        submit(actionBox, pathButton, projectBox, vmhostBox, startBox, configureBox)
-    except:
-        msg = QMessageBox()
-        msg.setWindowTitle("GNScript")
-        msg.setText("Please enter a valid IP Address")
-        msg.exec_()
-
-def setStylesheet(app, path):
-    with open(path, "r") as fh:
-        app.setStyleSheet(fh.read())
-
-
-def openPath(actionBox, pathButton):
-    if actionBox.currentText() == "Load":
+def openPath(actionBox,pathButton):
+    if (actionBox.currentText() == "Load"):
         openFile = QFileDialog()
         openFile.exec_()
         try:
@@ -45,36 +28,28 @@ def openPath(actionBox, pathButton):
             pathButton.setText(*file)
         except:
             print("Error: No File opened")
-    elif actionBox.currentText() == "Save":
+    elif (actionBox.currentText() == "Save"):
         folder = str(QFileDialog.getExistingDirectory(pathButton, "Select Directory"))
         try:
             pathButton.setText(folder)
         except:
             print("Error: No Folder opened")
 
-
-def clickStart(startBox, configureBox):
+def clickStart(startBox,configureBox):
     if startBox.isChecked():
         configureBox.setDisabled(False)
     else:
         configureBox.setChecked(False)
         configureBox.setDisabled(True)
 
-
-def checkAction(startBox, configureBox, actionBox, pathButton):
+def resetPath(pathButton):
     pathButton.setText("...")
-    if actionBox.currentText() == "Save":
-        startBox.setDisabled(True)
-        startBox.setChecked(False)
-        configureBox.setDisabled(True)
-        configureBox.setChecked(False)
-    else:
-        startBox.setDisabled(False)
-
 
 def main():
     app = QApplication([])
-    setStylesheet(app, "./stylesheet.css")
+    stylesheet = "./stylesheet.css"
+    with open(stylesheet, "r") as fh:
+        app.setStyleSheet(fh.read())
     window = QWidget()
     window.setMinimumSize(1000, 720)
     window.setWindowTitle("GNScript")
@@ -90,7 +65,7 @@ def main():
     # vBoxCanvas.setContentsMargins(0,0,0,0)
 
     whiteCanvas = QWidget(objectName="whiteCanvas")
-    whiteCanvas.setFixedSize(630, 590)
+    whiteCanvas.setFixedSize(630,590)
     whiteCanvasShadow = QGraphicsDropShadowEffect(objectName="whiteCanvasShadow")
     whiteCanvasShadow.setXOffset(0)
     whiteCanvasShadow.setYOffset(0)
@@ -104,8 +79,8 @@ def main():
     vmhostLabel = QLabel("VMHOST", objectName="vmhostLabel")
 
     actionBox = QComboBox(objectName="actionBox")
-    actionBox.addItems(["Load", "Save"])
-    pathButton = QPushButton("...", objectName="pathButton")
+    actionBox.addItems(["Load","Save"])
+    pathButton = QPushButton("...",objectName="pathButton")
     projectBox = QTextEdit(objectName="projectBox")
     projectBox.setFixedHeight(25)
     vmhostBox = QTextEdit(objectName="vmhostBox")
@@ -117,7 +92,7 @@ def main():
 
     verticalSpacer = QSpacerItem(0, 0, QSizePolicy.Minimum, QSizePolicy.MinimumExpanding)
 
-    submitButton = QPushButton("Submit", objectName="submitButton")
+    submitButton = QPushButton("Submit",objectName="submitButton")
 
     vBoxContent = QVBoxLayout()
     vBoxContent.addWidget(welcomeLabel)
@@ -133,23 +108,22 @@ def main():
     vBoxContent.addWidget(configureBox)
     vBoxContent.addItem(verticalSpacer)
     vBoxContent.addWidget(submitButton)
-    vBoxContent.setContentsMargins(30, 50, 30, 30)
+    vBoxContent.setContentsMargins(30,50,30,30)
     vBoxContent.setSpacing(10)
 
     vBoxCanvas.addWidget(whiteCanvas)
     whiteCanvas.setFont(QFont("Arial"))
     whiteCanvas.setLayout(vBoxContent)
 
-    pathButton.clicked.connect(lambda: openPath(actionBox, pathButton))
-    submitButton.clicked.connect(
-        lambda: checkSubmit(actionBox, pathButton, projectBox, vmhostBox, startBox, configureBox))
-    actionBox.currentTextChanged.connect(lambda: checkAction(startBox, configureBox, actionBox, pathButton))
-    startBox.stateChanged.connect(lambda: clickStart(startBox, configureBox))
+    pathButton.clicked.connect(lambda: openPath(actionBox,pathButton))
+    submitButton.clicked.connect(lambda: submit(actionBox,pathButton,projectBox,vmhostBox,startBox,configureBox))
+    startBox.stateChanged.connect(lambda: clickStart(startBox,configureBox))
+    actionBox.currentTextChanged.connect(lambda: resetPath(pathButton))
 
     window.setLayout(vBoxCanvas)
     window.show()
-    app.exec_()
-
+    app.exec()
 
 if __name__ == '__main__':
     main()
+
