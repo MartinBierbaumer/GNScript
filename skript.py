@@ -1,11 +1,8 @@
 import telnetlib
 import requests
 import time
-import sys
 import threading
 import os
-import json
-import re
 import argparse
 
 
