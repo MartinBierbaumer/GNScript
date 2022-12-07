@@ -8,7 +8,6 @@ from PyQt5.QtSvg import *
 from screeninfo import get_monitors
 
 
-
 def submit(actionBox, pathButton, projectBox, vmhostBox, startBox, configureBox):
     args = "-" + actionBox.currentText().lower()
     args += " \"" + pathButton.text() + "\""
@@ -40,11 +39,13 @@ def checkSubmit(actionBox, pathButton, projectBox, vmhostBox, startBox, configur
 
     submit(actionBox, pathButton, projectBox, vmhostBox, startBox, configureBox)
 
+
 def errorMessage(text):
     msg = QMessageBox()
     msg.setWindowTitle("GNScript")
     msg.setText(text)
     msg.exec_()
+
 
 def setStylesheet(app, path):
     with open(path, "r") as fh:
@@ -60,7 +61,7 @@ def openPath(actionBox, pathButton):
             pathButton.setText(*file)
         except:
             print("Error: No File opened")
-    elif actionBox.currentText() == "Save":
+    else:
         folder = str(QFileDialog.getExistingDirectory(pathButton, "Select Directory"))
         try:
             pathButton.setText(folder)
@@ -97,8 +98,8 @@ def main():
         print(m)
 
     window = QWidget()
-    window.setMinimumSize(int(0.4*screens[0].width), int(0.65*screens[0].height))
-    window.resize(int(0.55*screens[0].width), int(0.67*screens[0].height))
+    window.setMinimumSize(int(0.4 * screens[0].width), int(0.65 * screens[0].height))
+    window.resize(int(0.55 * screens[0].width), int(0.67 * screens[0].height))
     window.setWindowTitle("GNScript")
 
     p = QPalette()
@@ -110,10 +111,9 @@ def main():
 
     vBoxCanvas = QVBoxLayout(objectName="vBoxCanvas")
     vBoxCanvas.setAlignment(Qt.AlignCenter)
-    # vBoxCanvas.setContentsMargins(0,0,0,0)
 
     whiteCanvas = QWidget(objectName="whiteCanvas")
-    whiteCanvas.setFixedSize(int(0.33*screens[0].width), int(0.55*screens[0].height))
+    whiteCanvas.setFixedSize(int(0.33 * screens[0].width), int(0.55 * screens[0].height))
     whiteCanvasShadow = QGraphicsDropShadowEffect(objectName="whiteCanvasShadow")
     whiteCanvasShadow.setXOffset(0)
     whiteCanvasShadow.setYOffset(0)
@@ -129,13 +129,19 @@ def main():
     projectLabel = QLabel("PROJECT", objectName="projectLabel")
     vmhostLabel = QLabel("VMHOST", objectName="vmhostLabel")
 
+    widgetHeight = int(0.02315*screens[0].height)
+    widgetHeight2 = int(0.025*screens[0].height)
+    submitButtonHeight = int(0.0324*screens[0].height)
+    print(widgetHeight)
     actionBox = QComboBox(objectName="actionBox")
     actionBox.addItems(["Load", "Save"])
+    actionBox.setFixedHeight(widgetHeight2)
     pathButton = QPushButton("...", objectName="pathButton")
+    pathButton.setFixedHeight(widgetHeight)
     projectBox = QTextEdit(objectName="projectBox")
-    projectBox.setFixedHeight(25)
+    projectBox.setFixedHeight(widgetHeight)
     vmhostBox = QTextEdit(objectName="vmhostBox")
-    vmhostBox.setFixedHeight(25)
+    vmhostBox.setFixedHeight(widgetHeight)
 
     startBox = QCheckBox("Start Nodes", objectName="startBox")
     configureBox = QCheckBox("Configure Nodes", objectName="configureBox")
@@ -144,30 +150,25 @@ def main():
     verticalSpacer = QSpacerItem(0, 0, QSizePolicy.Minimum, QSizePolicy.MinimumExpanding)
 
     submitButton = QPushButton("Submit", objectName="submitButton")
+    submitButton.setFixedHeight(submitButtonHeight)
 
     vBoxContent = QVBoxLayout()
-    vBoxContent.addWidget(logo)
-    vBoxContent.addWidget(actionLabel)
-    vBoxContent.addWidget(actionBox)
-    vBoxContent.addWidget(pathLabel)
-    vBoxContent.addWidget(pathButton)
-    vBoxContent.addWidget(projectLabel)
-    vBoxContent.addWidget(projectBox)
-    vBoxContent.addWidget(vmhostLabel)
-    vBoxContent.addWidget(vmhostBox)
-    vBoxContent.addWidget(startBox)
-    vBoxContent.addWidget(configureBox)
-    vBoxContent.addItem(verticalSpacer)
-    vBoxContent.addWidget(submitButton)
+    for widget in [welcomeLabel, actionLabel, actionBox, pathLabel, pathButton, projectLabel, projectBox, vmhostLabel, vmhostBox, startBox,
+                   configureBox, verticalSpacer, submitButton]:
+        if widget == verticalSpacer:
+            vBoxContent.addItem(widget)
+            continue
+        vBoxContent.addWidget(widget)
+
     vBoxContent.setContentsMargins(30, 50, 30, 30)
     vBoxContent.setSpacing(10)
 
     vBoxCanvas.addWidget(whiteCanvas)
-    whiteCanvas.setFont(QFont("Arial"))
     whiteCanvas.setLayout(vBoxContent)
 
     pathButton.clicked.connect(lambda: openPath(actionBox, pathButton))
-    submitButton.clicked.connect(lambda: checkSubmit(actionBox, pathButton, projectBox, vmhostBox, startBox, configureBox))
+    submitButton.clicked.connect(
+        lambda: checkSubmit(actionBox, pathButton, projectBox, vmhostBox, startBox, configureBox))
     actionBox.currentTextChanged.connect(lambda: checkAction(startBox, configureBox, actionBox, pathButton))
     startBox.stateChanged.connect(lambda: clickStart(startBox, configureBox))
 
