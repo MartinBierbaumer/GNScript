@@ -3,7 +3,7 @@ import os
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
-from PyQt5.uic.properties import QtWidgets
+from PyQt5.QtSvg import *
 from screeninfo import get_monitors
 
 
@@ -70,13 +70,16 @@ def main():
     # vBoxCanvas.setContentsMargins(0,0,0,0)
 
     whiteCanvas = QWidget(objectName="whiteCanvas")
-    whiteCanvas.setFixedSize(int(0.33*screens.__getitem__(0).width), int(0.55*screens.__getitem__(0).height))
+    whiteCanvas.setFixedSize(int(0.33*screens[0].width), int(0.55*screens[0].height))
     whiteCanvasShadow = QGraphicsDropShadowEffect(objectName="whiteCanvasShadow")
     whiteCanvasShadow.setXOffset(0)
     whiteCanvasShadow.setYOffset(0)
     whiteCanvasShadow.setBlurRadius(100)
     whiteCanvas.setGraphicsEffect(whiteCanvasShadow)
 
+    logo = QSvgWidget("logo prototype.svg")
+    logo.setFixedHeight(130)
+    logo.setFixedWidth(250)
     welcomeLabel = QLabel("GNScript", objectName="welcomeLabel")
     actionLabel = QLabel("ACTION", objectName="actionLabel")
     pathLabel = QLabel("PATH", objectName="pathLabel")
@@ -100,7 +103,7 @@ def main():
     submitButton = QPushButton("Submit",objectName="submitButton")
 
     vBoxContent = QVBoxLayout()
-    vBoxContent.addWidget(welcomeLabel)
+    vBoxContent.addWidget(logo)
     vBoxContent.addWidget(actionLabel)
     vBoxContent.addWidget(actionBox)
     vBoxContent.addWidget(pathLabel)
