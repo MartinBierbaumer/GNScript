@@ -1,4 +1,4 @@
-import sys
+import threading
 import os
 import ipaddress
 from PyQt5.QtGui import *
@@ -7,6 +7,8 @@ from PyQt5.QtCore import *
 from PyQt5.QtSvg import *
 from screeninfo import get_monitors
 
+def execute(command):
+    os.system(command)
 
 def submit(actionBox, pathButton, projectBox, vmhostBox, startBox, configureBox):
     args = "-" + actionBox.currentText().lower()
@@ -19,7 +21,8 @@ def submit(actionBox, pathButton, projectBox, vmhostBox, startBox, configureBox)
     if configureBox.isChecked():
         args += " -configure "
     print(args)
-    os.system("python3 ./skript.py " + args)
+    thread = threading.Thread(target=execute, args=("python3 ./skript.py " + args, ))
+    thread.start()
 
 
 def checkSubmit(actionBox, pathButton, projectBox, vmhostBox, startBox, configureBox):
