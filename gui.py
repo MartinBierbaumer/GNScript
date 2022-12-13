@@ -133,7 +133,7 @@ def main():
     welcomeLabel = QLabel("GNScript", objectName="welcomeLabel")
     actionLabel = QLabel("ACTION", objectName="actionLabel")
     pathLabel = QLabel("PATH", objectName="pathLabel")
-    projectLabel = QLabel("PROJECT", objectName="projectLabel")
+    projectLabel = QLabel("PROJECT NAME", objectName="projectLabel")
     vmhostLabel = QLabel("VMHOST", objectName="vmhostLabel")
 
     widgetHeight = int(0.02315*screenHeight)
