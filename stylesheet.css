@@ -4,14 +4,13 @@
 }
 
 #welcomeLabel {
-	font-size: 45px; 
+	font-size: 45px;
 	font-weight: bold
 }
 
 QComboBox#actionBox { 
 	background-color: #e6e6e6; 
-	border-radius: 5px; 
-	height: 27px 
+	border-radius: 5px;
 } 
 
 QComboBox#actionBox::drop-down { 
@@ -29,7 +28,7 @@ QComboBox#actionBox::down-arrow {
 #pathButton {
 	background-color: #e6e6e6; 
 	border-radius: 5px; 
-	height: 25px
+
 }
 
 #vmhostBox, #projectBox {
@@ -40,10 +39,14 @@ QComboBox#actionBox::down-arrow {
 #submitButton {
 	text-align: center; 
 	background-color: #464646; 
-	color: white; 
-	height: 35px; 
+	color: white;
 	border-radius:7px
 }
+
+#submitButton:hover {
+	background-color: #5e5e5e;
+}
+
 
 #submitButton:hover {
 	background-color: #808080;
