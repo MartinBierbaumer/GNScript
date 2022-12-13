@@ -7,31 +7,42 @@ ssh = False
 shutdown_found = False
 in_int = False
 
-for i in lines:
-    if i.startswith(keywoards[2] + " dhcp") or \
-       i.startswith(keywoards[2] + " domain"):
-        output += i
-    if i.startswith(keywoards[3] + " ip domain"):
-        output += i
-    if i.startswith(keywoards[7]):
-        output += i.replace("^C", "#")
-    if i.startswith(keywoards[0]) or\
-       i.startswith(keywoards[4]) or\
-       i.startswith(keywoards[1]):
-        output += i
-    if i.startswith(keywoards[5]):
+
+for line in lines:
+    if not line.strip():
+        continue
+    if (line.startswith(keywoards[2] + " dhcp") or
+        line.startswith(keywoards[2] + " domain")):
+        output += line
+    if line.startswith(keywoards[3] + " ip domain"):
+        output += line
+    if line.startswith(keywoards[7]):
+        output += line.replace("^C", "#")
+    if line.startswith(keywoards[0]) or\
+       line.startswith(keywoards[4]) or\
+       line.startswith(keywoards[1]):
+        output += line
+    if line.startswith(keywoards[5]):
         in_int = True
-    if i.startswith(keywoards[6]) or \
-       i.startswith(keywoards[2] + " dhcp pool") or \
-       i.startswith(keywoards[2] + " access-list") or \
-       i.startswith(keywoards[8]):
         write = True
-    if i.startswith("!") and write is True:
-        output += "exit\n"
+    if line.startswith(keywoards[6]) or \
+       line.startswith(keywoards[2] + " dhcp pool") or \
+       line.startswith(keywoards[2] + " access-list") or \
+       line.startswith(keywoards[8]):
+        write = True
+    if line.startswith("!") and write is True:
+        if in_int is True and shutdown_found is False:
+            output += "no shutdown\n"
+        output += "exit\n\n"
         write = False
+        in_int = False
+        shutdown_found = False
     if write is True:
-        if i.find("ssh"):
+        if line.find("ssh") > 0:
             ssh = True
-        output += i
-output += "crypto key generate rsa modulus 1024 exportable"
+        if line.find("shutdown") > 0:
+            shutdown_found = True
+        output += line
+if ssh is True:
+    output += "crypto key generate rsa modulus 1024 exportable"
 print(output)
