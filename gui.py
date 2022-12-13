@@ -129,7 +129,7 @@ def main():
 
     logo = QSvgWidget("logo prototype.svg", objectName="logo")
     logo.setFixedHeight(int(0.131*screenHeight))
-    logo.setFixedWidth(int(0.130*screenWidth))
+    logo.setFixedWidth(int(0.231*screenHeight))
     welcomeLabel = QLabel("GNScript", objectName="welcomeLabel")
     actionLabel = QLabel("ACTION", objectName="actionLabel")
     pathLabel = QLabel("PATH", objectName="pathLabel")
@@ -143,6 +143,7 @@ def main():
     actionBox = QComboBox(objectName="actionBox")
     actionBox.addItems(["Load", "Save"])
     actionBox.setFixedHeight(widgetHeight2)
+    actionBox.setStyleSheet("QComboBox::down-arrow { image: url(./arrow.ico); width: "+str(int(0.007*screenWidth))+"px; margin-right: "+str(int(0.003*screenWidth))+"px; border: 0px }")
     pathButton = QPushButton("...", objectName="pathButton")
     pathButton.setFixedHeight(widgetHeight)
     projectBox = QTextEdit(objectName="projectBox")
@@ -180,6 +181,8 @@ def main():
     startBox.stateChanged.connect(lambda: clickStart(startBox, configureBox))
 
     window.setLayout(vBoxCanvas)
+    windowIcon = QIcon("./icon prototype.png")
+    window.setWindowIcon(windowIcon)
     window.show()
     app.exec_()
 
