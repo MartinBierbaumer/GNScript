@@ -41,23 +41,27 @@ def getKonfig(telnet, switch=True):
 
     running = telnet.read_until(b"!\r\nend", 30).decode('utf-8')
 
-    telnet.write(b"show vlan brief\n")
-    data = telnet.read_until(b"")
-    pattern = '^(?!1\s)([0-9]{1,4})[\s]*([0-9a-zA-Z]*)[\s]*(active|suspended){1}'
-    vlans = []
+    if (switch):
+        telnet.write(b"show vlan brief\n")
+        data = telnet.read_until(b"end sequence", 2).decode('utf-8')
+        pattern = '^(\\d+)[\\s]+([\\S]+)[\\s]+([\\S]+)'
+        vlans = []
 
-    for line in data.split("\n"):
-        matches = re.finditer(pattern, line)
+        for line in data.split("\n"):
+            matches = re.finditer(pattern, line)
 
-        for match in matches:
-            vlans.append((match.group(1), match.group(2), match.group(3)))
+            print(matches)
 
-    print(vlans)
+            for match in matches:
+                vlans.append((match.group(1), match.group(2), match.group(3)))
+
+        print(data)
+        print(vlans)
 
     return running
 
 sw_hashes = ['14b981002e40b660f2d7400401e04c14', '8f14b50083a14688dec2fc791706bb3e']
-ro_hashes = ['e7cb1bbd0c59280dd946feefa68fa270']
+ro_hashes = ['e7cb1bbd0c59280dd946feefa68fa270', '37c148ffa14a82f418a6e9c2b049fafe']
 
 def saveItem(vmhost, device, path):
     """writes the konfig to a file"""
@@ -75,6 +79,7 @@ def saveKonfig(vmhost, projectEndpoint, path):
 
     threads = []
     for device in getDevices(projectEndpoint):
+        print(device['properties']['hda_disk_image_md5sum'])
         thread = threading.Thread(target=saveItem, args=(vmhost, device, path + "/" + device["name"] + ".skript"))
         thread.start()
         threads.append(thread)
@@ -84,7 +89,6 @@ def saveKonfig(vmhost, projectEndpoint, path):
 
 def savePhysical(vmhost, projectEndpoint, path):
     """saves the physical config"""
-    #TODO: implement
 
     with open(path + "/konfig.konf", "w") as file:
         file.write(json.dumps(getDevices(projectEndpoint)))
