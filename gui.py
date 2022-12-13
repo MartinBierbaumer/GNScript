@@ -90,19 +90,23 @@ def checkAction(startBox, configureBox, actionBox, pathButton):
     else:
         startBox.setDisabled(False)
 
+def getDisplayResolution():
+    screens = []
+    for m in get_monitors():
+        screens.append(m)
+    return screens
 
 def main():
     app = QApplication([])
     setStylesheet(app, "./stylesheet.css")
 
-    screens = []
-    for m in get_monitors():
-        screens.append(m)
-        print(m)
+    screens = getDisplayResolution()
+    screenWidth = screens[0].width
+    screenHeight = screens[0].height
 
     window = QWidget()
-    window.setMinimumSize(int(0.4 * screens[0].width), int(0.65 * screens[0].height))
-    window.resize(int(0.55 * screens[0].width), int(0.67 * screens[0].height))
+    window.setMinimumSize(int(0.4 * screenWidth), int(0.65 * screenHeight))
+    window.resize(int(0.55 * screenWidth), int(0.67 * screenHeight))
     window.setWindowTitle("GNScript")
 
     p = QPalette()
@@ -116,26 +120,26 @@ def main():
     vBoxCanvas.setAlignment(Qt.AlignCenter)
 
     whiteCanvas = QWidget(objectName="whiteCanvas")
-    whiteCanvas.setFixedSize(int(0.33 * screens[0].width), int(0.55 * screens[0].height))
+    whiteCanvas.setFixedSize(int(0.33 * screenWidth), int(0.55 * screenHeight))
     whiteCanvasShadow = QGraphicsDropShadowEffect(objectName="whiteCanvasShadow")
     whiteCanvasShadow.setXOffset(0)
     whiteCanvasShadow.setYOffset(0)
     whiteCanvasShadow.setBlurRadius(100)
     whiteCanvas.setGraphicsEffect(whiteCanvasShadow)
 
-    logo = QSvgWidget("logo prototype.svg")
-    logo.setFixedHeight(130)
-    logo.setFixedWidth(250)
+    logo = QSvgWidget("logo prototype.svg", objectName="logo")
+    logo.setFixedHeight(int(0.131*screenHeight))
+    logo.setFixedWidth(int(0.130*screenWidth))
     welcomeLabel = QLabel("GNScript", objectName="welcomeLabel")
     actionLabel = QLabel("ACTION", objectName="actionLabel")
     pathLabel = QLabel("PATH", objectName="pathLabel")
     projectLabel = QLabel("PROJECT", objectName="projectLabel")
     vmhostLabel = QLabel("VMHOST", objectName="vmhostLabel")
 
-    widgetHeight = int(0.02315*screens[0].height)
-    widgetHeight2 = int(0.025*screens[0].height)
-    submitButtonHeight = int(0.0324*screens[0].height)
-    print(widgetHeight)
+    widgetHeight = int(0.02315*screenHeight)
+    widgetHeight2 = int(0.025*screenHeight)
+    submitButtonHeight = int(0.0324*screenHeight)
+
     actionBox = QComboBox(objectName="actionBox")
     actionBox.addItems(["Load", "Save"])
     actionBox.setFixedHeight(widgetHeight2)
@@ -156,14 +160,14 @@ def main():
     submitButton.setFixedHeight(submitButtonHeight)
 
     vBoxContent = QVBoxLayout()
-    for widget in [welcomeLabel, actionLabel, actionBox, pathLabel, pathButton, projectLabel, projectBox, vmhostLabel, vmhostBox, startBox,
+    for widget in [logo, actionLabel, actionBox, pathLabel, pathButton, projectLabel, projectBox, vmhostLabel, vmhostBox, startBox,
                    configureBox, verticalSpacer, submitButton]:
         if widget == verticalSpacer:
             vBoxContent.addItem(widget)
             continue
         vBoxContent.addWidget(widget)
 
-    vBoxContent.setContentsMargins(30, 50, 30, 30)
+    vBoxContent.setContentsMargins(30, 40, 30, 30)
     vBoxContent.setSpacing(10)
 
     vBoxCanvas.addWidget(whiteCanvas)
