@@ -5,6 +5,7 @@ import threading
 import os
 import argparse
 import json
+import re
 
 
 def getProjectEndpoint(host="localhost", port="3080", projectName=None):
@@ -38,7 +39,22 @@ def getKonfig(telnet, switch=True):
     telnet.write(b"show run\n")
     telnet.read_until(b" bytes", 2)
 
-    return telnet.read_until(b"!\r\nend", 30).decode('utf-8')
+    running = telnet.read_until(b"!\r\nend", 30).decode('utf-8')
+
+    telnet.write(b"show vlan brief\n")
+    data = telnet.read_until(b"")
+    pattern = '^(?!1\s)([0-9]{1,4})[\s]*([0-9a-zA-Z]*)[\s]*(active|suspended){1}'
+    vlans = []
+
+    for line in data.split("\n"):
+        matches = re.finditer(pattern, line)
+
+        for match in matches:
+            vlans.append((match.group(1), match.group(2), match.group(3)))
+
+    print(vlans)
+
+    return running
 
 sw_hashes = ['14b981002e40b660f2d7400401e04c14', '8f14b50083a14688dec2fc791706bb3e']
 ro_hashes = ['e7cb1bbd0c59280dd946feefa68fa270']
