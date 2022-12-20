@@ -142,8 +142,8 @@ def startDevice(device, projectEndpoint):
     print(projectEndpoint + "/nodes/" + device["node_id"] + "/start")
     requests.post(projectEndpoint + "/nodes/" + device["node_id"] + "/start", '{}')
 
-def createProject(projectEndpoint):
-    requests.post(endPoint, '{"name": ' + args.project + ', "path": "C:\\Users\\Security\\GNS3\\projects\\' + args.project + '"}')
+def createProject(endPoint):
+    print(requests.post(endPoint, '{"name": "' + args.project + '", "path": "C:\\\\Users\\\\Security\\\\GNS3\\\\projects\\\\' + args.project + '"}').json())
 
 
 
@@ -168,13 +168,18 @@ def createDevice(device, projectEndpoint, vmhost, konfig):
 
 
 def load(vmhost, projectName, path):
-    projectEndpoint = getProjectEndpoint(projectName=projectName)
-
     with open(path + "/konfig.konf", "r") as json_file:
         data = json.load(json_file)
 
+    endPoint = "http://localhost:" + "3080" + "/v2/projects"
+    createProject(endPoint)
+
+    projectEndpoint = getProjectEndpoint(projectName=projectName)
+
     for device in data:
         loadDevice(device, projectEndpoint)
+
+
 
     threads = []
     for device in getDevices(projectEndpoint):
@@ -193,8 +198,6 @@ parser.add_argument('-load', help="loads the configuration")
 parser.add_argument('-vmhost', help="IP of the GNS-VM")
 parser.add_argument('-project', help="name of project")
 args = parser.parse_args()
-
-projectEndpoint = getProjectEndpoint(projectName=args.project)
 
 if args.save is not None:
     save(args.vmhost, args.project, args.save)
