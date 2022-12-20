@@ -32,9 +32,9 @@ def getDevices(projectEndpoint):
 
 
 def setMode(telnet):
-    telnet.write(b"\n")
-    telnet.write(b"\n")
-    telnet.write(b"\n")
+    telnet.write(b"\r\n")
+    telnet.write(b"\r\n")
+    telnet.write(b"\r\n")
     time.sleep(1)
     telnet.write(b"\n")
     telnet.write(b"enable\n")
@@ -64,7 +64,7 @@ def router_script_create(config):
         elif line.startswith("!") and write is True:
             if in_int is True and shutdown_found is False:
                 output += "no shutdown\n"
-            output += "exit\n\n"
+            output += "exit\n"
             write = False
             in_int = False
             shutdown_found = False
@@ -73,11 +73,11 @@ def router_script_create(config):
                 ssh = True
             if line.find("shutdown") >= 0:
                 shutdown_found = True
-            output += line + "\n"
+            output += line
             continue
         elif line.startswith("end"):
             continue
-        output += line + "\n"
+        output += line
 
     if ssh is True:
         output += "crypto key generate rsa modulus 1024 exportable\nend\n"
@@ -97,7 +97,7 @@ def getVlan(telnet):
         print(matches)
 
         for match in matches:
-                vlans.append((match.group(1), match.group(2), match.group(3)))
+                vlans.append((match.group(1), match.group(2)))
 
     return vlans
 
@@ -125,7 +125,8 @@ def switch_script_creates(config, telnet):
             continue
         output += line
     for vlan in vlans:
-        output += "vlan " + vlan[0] + "\nname " + vlan[1] + "\n"
+        if int(vlan[0]) not in [1002, 1003, 1004, 1005, 1]:
+            output += "vlan " + vlan[0] + "\nname " + vlan[1] + "\n"
     output += "exit\n"
     if ssh is True:
         output += "crypto key generate rsa modulus 1024 exportable\nend\n"
