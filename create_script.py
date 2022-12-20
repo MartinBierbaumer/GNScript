@@ -1,3 +1,4 @@
+import re
 def router_script_create(config):
     keywoards = ["ip", "interface", "router", "line"]
     output = "en\nconf t\n"
@@ -35,6 +36,47 @@ def router_script_create(config):
             continue
         output += line + "\n"
 
+    if ssh is True:
+        output += "crypto key generate rsa modulus 1024 exportable\nend\n"
+    print(output)
+
+def switch_script_creates(config, brief):
+    text_file = open("res/SW1_VLAN_BRIEF.txt", "r")
+    data = text_file.read()
+    text_file.close()
+
+    pattern = '^(?!1\s)([0-9]{1,4})[\s]*([0-9a-zA-Z]*)[\s]*(active|suspended){1}'
+    vlans = []
+    for line in data.split("\n"):
+        matches = re.finditer(pattern, line)
+        for match in matches:
+            vlans.append((match.group(1), match.group(2)))
+
+    with open("res/SW1.txt") as f:
+        lines = f.readlines()
+    output = "en\nconf t\n"
+    write = False
+    ssh = False
+    for line in lines:
+        if not line.strip():
+            continue
+        elif (line.startswith("interface") or
+              line.startswith("line")):
+            write = True
+        elif write is True:
+            if line.find("ssh") >= 0:
+                ssh = True
+            if line.startswith("!"):
+                output += "exit\n"
+                write = False
+            output += line
+            continue
+        elif line.startswith("end"):
+            continue
+        output += line
+    for vlan in vlans:
+        output += "vlan " + vlan[0] + "\nname " + vlan[1] + "\n"
+    output += "exit\n"
     if ssh is True:
         output += "crypto key generate rsa modulus 1024 exportable\nend\n"
     print(output)
