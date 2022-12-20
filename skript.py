@@ -112,11 +112,20 @@ def saveKonfig(vmhost, projectEndpoint, path):
         thread.join()
 
 
+def getLinks(projectEndpoint):
+    print(projectEndpoint + "/links")
+    links = requests.get(projectEndpoint + "/links")
+    print(links)
+    return links.json()
+
 def savePhysical(vmhost, projectEndpoint, path):
     """saves the physical config"""
 
     with open(path + "/konfig.konf", "w") as file:
         file.write(json.dumps(getDevices(projectEndpoint)))
+
+    with open(path + "/links.konf", "w") as file:
+        file.write(json.dumps(getLinks(projectEndpoint)))
 
 
 def save(vmhost, projectName, path):
@@ -143,7 +152,15 @@ def startDevice(device, projectEndpoint):
     requests.post(projectEndpoint + "/nodes/" + device["node_id"] + "/start", '{}')
 
 def createProject(endPoint):
-    print(requests.post(endPoint, '{"name": "' + args.project + '", "path": "C:\\\\Users\\\\Security\\\\GNS3\\\\projects\\\\' + args.project + '"}').json())
+    requests.post(endPoint, '{"name": "' + args.project + '", "path": "C:\\\\Users\\\\Security\\\\GNS3\\\\projects\\\\' + args.project + '"}').json()
+
+def connectDevices(nodeLinks, projectEndpoint):
+    for link in getLinks(projectEndpoint):
+        device = link["nodes"]
+        print(requests.post(projectEndpoint + "/links", '{"nodes": [{"adapter_number": ' + str(device[0]["adapter_number"]) + ', "node_id": "' + str(device[0]["node_id"]) + '", "port_number": ' + str(device[0]["port_number"]) + '}, { "adapter_number": ' + str(device[1]["adapter_number"]) + ', "node_id": "' + str(device[1]["node_id"]) + '", "port_number": ' + str(device[1]["port_number"]) + '}]}').json())
+
+
+
 
 
 
@@ -172,6 +189,9 @@ def load(vmhost, projectName, path):
     with open(path + "/konfig.konf", "r") as json_file:
         data = json.load(json_file)
 
+    with open(path + "/links.konf", "r") as json_file:
+        nodeLinks = json.load(json_file)
+
     endPoint = "http://localhost:" + "3080" + "/v2/projects"
     createProject(endPoint)
 
@@ -180,7 +200,8 @@ def load(vmhost, projectName, path):
     for device in data:
         loadDevice(device, projectEndpoint)
 
-
+    for links in nodeLinks:
+        connectDevices(links,projectEndpoint)
 
     threads = []
     for device in getDevices(projectEndpoint):
