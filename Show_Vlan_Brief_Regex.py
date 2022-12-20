@@ -11,6 +11,6 @@ for line in data.split("\n"):
     matches = re.finditer(pattern,line)
 
     for match in matches:
-        vlans.append((match.group(1),match.group(2),match.group(3)))
+        vlans.append((match.group(1),match.group(2)))
 
 print(vlans)

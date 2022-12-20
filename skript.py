@@ -124,16 +124,57 @@ def save(vmhost, projectName, path):
         os.mkdir(path)
     except:
         print('path exists')
+
     projectEndpoint = getProjectEndpoint(projectName=projectName)
     saveKonfig(vmhost, projectEndpoint, path + "/skripts")
     savePhysical(vmhost, projectEndpoint, path)
 
+    print(projectEndpoint)
+
+
+def loadDevice(device, projectEndpoint):
+    print(device)
+    requests.post(projectEndpoint + "/templates/" + device["template_id"], '{"x": ' + str(device["x"]) + ', "y": ' + str(device["y"]) + '}')
+
+def startDevice(device, projectEndpoint):
+    print(projectEndpoint + "/nodes/" + device["node_id"] + "/start")
+    requests.post(projectEndpoint + "/nodes/" + device["node_id"] + "/start", '{}')
+
+
+def createDevice(device, projectEndpoint, vmhost, konfig):
+    print(konfig)
+
+    startDevice(device, projectEndpoint)
+
+    print("sleeping")
+    time.sleep(180)
+    print("writing")
+
+    telnet = telnetlib.Telnet(vmhost, device["console"])
+    telnet.write(b"\n")
+    telnet.write(b"enable\n")
+    telnet.write(b"conf t\n")
+    telnet.write(str.encode(konfig))
+
 
 def load(vmhost, projectName, path):
-    with open(path, "r") as json_file:
+    projectEndpoint = getProjectEndpoint(projectName=projectName)
+
+    with open(path + "/konfig.konf", "r") as json_file:
         data = json.load(json_file)
+
     for device in data:
-        print(device)
+        loadDevice(device, projectEndpoint)
+
+    threads = []
+    for device in getDevices(projectEndpoint):
+        with open(path + "/skripts/" + device["name"] + ".skript") as f:
+            thread = threading.Thread(target=createDevice, args=(device, projectEndpoint, vmhost, f.read()))
+            thread.start()
+            threads.append(thread)
+
+    for thread in threads:
+        thread.join()
 
 
 parser = argparse.ArgumentParser(prog="GNScript", description="retrieves config-skripts from GNS")
