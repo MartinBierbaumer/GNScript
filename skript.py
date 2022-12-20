@@ -147,7 +147,7 @@ def createDevice(device, projectEndpoint, vmhost, konfig):
     startDevice(device, projectEndpoint)
 
     print("sleeping")
-    time.sleep(120)
+    time.sleep(180)
     print("writing")
 
     telnet = telnetlib.Telnet(vmhost, device["console"])
