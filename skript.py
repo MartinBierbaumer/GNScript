@@ -14,6 +14,8 @@ import logging
 def getProjectEndpoint(host="localhost", port="3080", projectName=None):
     """returns the GNS-API projectEndpoint"""
 
+
+    global endPoint
     endPoint = "http://" + host + ":" + port + "/v2/projects"
     r = requests.get(endPoint)
     for project in r.json():
@@ -139,6 +141,10 @@ def loadDevice(device, projectEndpoint):
 def startDevice(device, projectEndpoint):
     print(projectEndpoint + "/nodes/" + device["node_id"] + "/start")
     requests.post(projectEndpoint + "/nodes/" + device["node_id"] + "/start", '{}')
+
+def createProject(projectEndpoint):
+    requests.post(endPoint, '{"name": ' + args.project + ', "path": "C:\\Users\\Security\\GNS3\\projects\\' + args.project + '"}')
+
 
 
 def createDevice(device, projectEndpoint, vmhost, konfig):
