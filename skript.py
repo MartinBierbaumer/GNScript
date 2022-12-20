@@ -150,8 +150,9 @@ def createProject(projectEndpoint):
 def writeDevice(device, vmhost, konfig):
     print(vmhost + " " + str(device['console']))
     tel = telnetlib.Telnet(vmhost, device["console"])
-    tel.expect([b"#", b">"], 300)
-    tel.write(b"\n")
+
+    time.sleep(180)
+
     tel.write(b"enable\n")
     tel.write(b"conf t\n")
     for line in konfig.split("\n"):
@@ -193,8 +194,6 @@ parser.add_argument('-load', help="loads the configuration")
 parser.add_argument('-vmhost', help="IP of the GNS-VM")
 parser.add_argument('-project', help="name of project")
 args = parser.parse_args()
-
-projectEndpoint = getProjectEndpoint(projectName=args.project)
 
 if args.save is not None:
     save(args.vmhost, args.project, args.save)
