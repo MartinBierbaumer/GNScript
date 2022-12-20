@@ -85,7 +85,7 @@ ip dhcp pool name
 no ip domain lookup
 
 ip domain name cisco
-
+ip inspect name mycbac icmp
 ip cef
 
 no ipv6 cef
@@ -279,6 +279,7 @@ no ip http secure-server
 ip nat inside source static 10.0.0.1 1.1.1.1
 
 !
+ip inspect name mycabc icmp
 
 ip access-list extended Inside_In
 
