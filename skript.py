@@ -150,8 +150,9 @@ def createProject(endPoint):
 def writeDevice(device, vmhost, konfig):
     print(vmhost + " " + str(device['console']))
     tel = telnetlib.Telnet(vmhost, device["console"])
-    tel.expect([b"#", b">"], 300)
-    tel.write(b"\n")
+
+    time.sleep(180)
+
     tel.write(b"enable\n")
     tel.write(b"conf t\n")
     for line in konfig.split("\n"):
