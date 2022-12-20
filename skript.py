@@ -141,20 +141,24 @@ def startDevice(device, projectEndpoint):
     requests.post(projectEndpoint + "/nodes/" + device["node_id"] + "/start", '{}')
 
 
+def writeDevice(device, vmhost, konfig):
+    print(vmhost + " " + str(device['console']))
+    tel = telnetlib.Telnet(vmhost, device["console"])
+    tel.expect([b"#", b">"], 300)
+    tel.write(b"\n")
+    tel.write(b"enable\n")
+    tel.write(b"conf t\n")
+    for line in konfig.split("\n"):
+        tel.write(str.encode(line + "\n"))
+        time.sleep(0.05)
+
+
 def createDevice(device, projectEndpoint, vmhost, konfig):
     print(konfig)
 
     startDevice(device, projectEndpoint)
 
-    print("sleeping")
-    time.sleep(180)
-    print("writing")
-
-    telnet = telnetlib.Telnet(vmhost, device["console"])
-    telnet.write(b"\n")
-    telnet.write(b"enable\n")
-    telnet.write(b"conf t\n")
-    telnet.write(str.encode(konfig))
+    writeDevice(device, vmhost, konfig)
 
 
 def load(vmhost, projectName, path):
@@ -184,7 +188,9 @@ parser.add_argument('-vmhost', help="IP of the GNS-VM")
 parser.add_argument('-project', help="name of project")
 args = parser.parse_args()
 
-if args.save != None:
+projectEndpoint = getProjectEndpoint(projectName=args.project)
+
+if args.save is not None:
     save(args.vmhost, args.project, args.save)
-if args.load != None:
+if args.load is not None:
     load(args.vmhost, args.project, args.load)
