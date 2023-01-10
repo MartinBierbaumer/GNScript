@@ -57,10 +57,13 @@ def setStylesheet(app, path):
 
 def openPath(actionBox, pathButton):
     folder = str(QFileDialog.getExistingDirectory(pathButton, "Select Directory"))
-    try:
-         pathButton.setText(folder)
-    except:
-         print("Error: No Folder opened")
+    if folder == "":
+        pathButton.setText("...")
+    else:
+        pathButton.setText(folder)
+
+
+
 
 
 def clickStart(startBox, configureBox):
