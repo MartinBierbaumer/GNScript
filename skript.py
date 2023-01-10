@@ -63,8 +63,8 @@ def router_script_create(config):
             write = True
         elif line.startswith("!") and write is True:
             if in_int is True and shutdown_found is False:
-                output += "no shutdown\n"
-            output += "exit\n"
+                output += " no shutdown\n"
+            output += " exit\n"
             write = False
             in_int = False
             shutdown_found = False
@@ -81,6 +81,7 @@ def router_script_create(config):
 
     if ssh is True:
         output += "crypto key generate rsa modulus 1024 exportable\nend\n"
+
     return output
 
 
@@ -117,7 +118,7 @@ def switch_script_creates(config, telnet):
             if line.find("ssh") >= 0:
                 ssh = True
             if line.startswith("!"):
-                output += "exit\n"
+                output += " exit\n"
                 write = False
             output += line
             continue
@@ -146,11 +147,12 @@ def getKonfig(telnet, switch=True):
     """retrieves the konfig and return it as a string"""
 
     setMode(telnet)
+    running = getRunning(telnet)
 
     if switch:
-        konfig = switch_script_creates(getRunning(telnet), telnet)
+        konfig = switch_script_creates(running, telnet)
     else:
-        konfig = router_script_create(getRunning(telnet))
+        konfig = router_script_create(running)
 
     return konfig
 
@@ -187,9 +189,7 @@ def saveKonfig(vmhost, projectEndpoint, path):
 
 
 def getLinks(projectEndpoint):
-    print(projectEndpoint + "/links")
     links = requests.get(projectEndpoint + "/links")
-    print(links)
     return links.json()
 
 def savePhysical(vmhost, projectEndpoint, path):
@@ -217,9 +217,9 @@ def save(vmhost, projectName, path):
     print(projectEndpoint)
 
 
+oldid_to_newid = dict()
 def loadDevice(device, projectEndpoint):
-    print(device)
-    requests.post(projectEndpoint + "/templates/" + device["template_id"], '{"x": ' + str(device["x"]) + ', "y": ' + str(device["y"]) + '}')
+    oldid_to_newid[device["node_id"]] = requests.post(projectEndpoint + "/templates/" + device["template_id"], '{"x": ' + str(device["x"]) + ', "y": ' + str(device["y"]) + '}').json()["node_id"]
 
 def startDevice(device, projectEndpoint):
     print(projectEndpoint + "/nodes/" + device["node_id"] + "/start")
@@ -228,10 +228,13 @@ def startDevice(device, projectEndpoint):
 def createProject(endPoint):
     requests.post(endPoint, '{"name": "' + args.project + '", "path": "C:\\\\Users\\\\Security\\\\GNS3\\\\projects\\\\' + args.project + '"}').json()
 
-def connectDevices(nodeLinks, projectEndpoint):
-    for link in getLinks(projectEndpoint):
-        device = link["nodes"]
-        print(requests.post(projectEndpoint + "/links", '{"nodes": [{"adapter_number": ' + str(device[0]["adapter_number"]) + ', "node_id": "' + str(device[0]["node_id"]) + '", "port_number": ' + str(device[0]["port_number"]) + '}, { "adapter_number": ' + str(device[1]["adapter_number"]) + ', "node_id": "' + str(device[1]["node_id"]) + '", "port_number": ' + str(device[1]["port_number"]) + '}]}').json())
+def connectDevices(aktuellerLink, projectEndpoint):
+    print(aktuellerLink)
+    links = aktuellerLink["nodes"]
+    print(links[0])
+    print(links[1])
+
+    print(requests.post(projectEndpoint + "/links", '{"nodes": [{"adapter_number": ' + str(links[0]["adapter_number"]) + ', "node_id": "' + str(oldid_to_newid[links[0]["node_id"]]) + '", "port_number": ' + str(links[0]["port_number"]) + '}, { "adapter_number": ' + str(links[1]["adapter_number"]) + ', "node_id": "' + str(oldid_to_newid[links[1]["node_id"]]) + '", "port_number": ' + str(links[1]["port_number"]) + '}]}').json())
 
 
 
@@ -240,10 +243,15 @@ def connectDevices(nodeLinks, projectEndpoint):
 
 def writeDevice(device, vmhost, konfig):
     print(vmhost + " " + str(device['console']))
+
+    time.sleep(10)
+
     tel = telnetlib.Telnet(vmhost, device["console"])
-
-    time.sleep(180)
-
+    print(tel.read_until(b"Press RETURN to get started!", 300))
+    tel.write(b"\r\n")
+    print(tel.read_until(b"passed code signing verification", 300))
+    time.sleep(1)
+    tel.write(b"\r\n")
     tel.write(b"enable\n")
     tel.write(b"conf t\n")
     for line in konfig.split("\n"):
@@ -251,15 +259,17 @@ def writeDevice(device, vmhost, konfig):
         time.sleep(0.05)
 
 
-def createDevice(device, projectEndpoint, vmhost, konfig):
+def createDevice(device, projectEndpoint, vmhost, konfig, start, configure):
     print(konfig)
 
-    startDevice(device, projectEndpoint)
+    if start:
+        startDevice(device, projectEndpoint)
 
-    writeDevice(device, vmhost, konfig)
+    if configure:
+        writeDevice(device, vmhost, konfig)
 
 
-def load(vmhost, projectName, path):
+def load(vmhost, projectName, path, start, configure):
     with open(path + "/konfig.konf", "r") as json_file:
         data = json.load(json_file)
 
@@ -275,12 +285,13 @@ def load(vmhost, projectName, path):
         loadDevice(device, projectEndpoint)
 
     for links in nodeLinks:
-        connectDevices(links,projectEndpoint)
+        print("Test123")
+        connectDevices(links, projectEndpoint)
 
     threads = []
     for device in getDevices(projectEndpoint):
         with open(path + "/skripts/" + device["name"] + ".skript") as f:
-            thread = threading.Thread(target=createDevice, args=(device, projectEndpoint, vmhost, f.read()))
+            thread = threading.Thread(target=createDevice, args=(device, projectEndpoint, vmhost, f.read(), start, configure))
             thread.start()
             threads.append(thread)
 
@@ -293,6 +304,8 @@ parser.add_argument('-save', help="saves the configuration and stores it")
 parser.add_argument('-load', help="loads the configuration")
 parser.add_argument('-vmhost', help="IP of the GNS-VM")
 parser.add_argument('-project', help="name of project")
+parser.add_argument('-start', help="starts the devices", action="store_true")
+parser.add_argument('-configure', help="configures the devices", action="store_true")
 args = parser.parse_args()
 
 if args.vmhost is None:
@@ -301,4 +314,4 @@ if args.vmhost is None:
 if args.save is not None:
     save(args.vmhost, args.project, args.save)
 if args.load is not None:
-    load(args.vmhost, args.project, args.load)
+    load(args.vmhost, args.project, args.load, args.start, args.configure)
