@@ -259,15 +259,17 @@ def writeDevice(device, vmhost, konfig):
         time.sleep(0.05)
 
 
-def createDevice(device, projectEndpoint, vmhost, konfig):
+def createDevice(device, projectEndpoint, vmhost, konfig, start, configure):
     print(konfig)
 
-    startDevice(device, projectEndpoint)
+    if start:
+        startDevice(device, projectEndpoint)
 
-    writeDevice(device, vmhost, konfig)
+    if configure:
+        writeDevice(device, vmhost, konfig)
 
 
-def load(vmhost, projectName, path):
+def load(vmhost, projectName, path, start, configure):
     with open(path + "/konfig.konf", "r") as json_file:
         data = json.load(json_file)
 
@@ -289,7 +291,7 @@ def load(vmhost, projectName, path):
     threads = []
     for device in getDevices(projectEndpoint):
         with open(path + "/skripts/" + device["name"] + ".skript") as f:
-            thread = threading.Thread(target=createDevice, args=(device, projectEndpoint, vmhost, f.read()))
+            thread = threading.Thread(target=createDevice, args=(device, projectEndpoint, vmhost, f.read(), start, configure))
             thread.start()
             threads.append(thread)
 
@@ -302,6 +304,8 @@ parser.add_argument('-save', help="saves the configuration and stores it")
 parser.add_argument('-load', help="loads the configuration")
 parser.add_argument('-vmhost', help="IP of the GNS-VM")
 parser.add_argument('-project', help="name of project")
+parser.add_argument('-start', help="starts the devices", action="store_true")
+parser.add_argument('-configure', help="configures the devices", action="store_true")
 args = parser.parse_args()
 
 if args.vmhost is None:
@@ -310,4 +314,4 @@ if args.vmhost is None:
 if args.save is not None:
     save(args.vmhost, args.project, args.save)
 if args.load is not None:
-    load(args.vmhost, args.project, args.load)
+    load(args.vmhost, args.project, args.load, args.start, args.configure)

@@ -8,6 +8,7 @@ from PyQt5.QtSvg import *
 from screeninfo import get_monitors
 
 def execute(command):
+    print(command)
     os.system(command)
 
 def submit(actionBox, pathButton, projectBox, vmhostBox, startBox, configureBox):
