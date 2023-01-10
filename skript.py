@@ -189,9 +189,7 @@ def saveKonfig(vmhost, projectEndpoint, path):
 
 
 def getLinks(projectEndpoint):
-    print(projectEndpoint + "/links")
     links = requests.get(projectEndpoint + "/links")
-    print(links)
     return links.json()
 
 def savePhysical(vmhost, projectEndpoint, path):
@@ -219,9 +217,9 @@ def save(vmhost, projectName, path):
     print(projectEndpoint)
 
 
+oldid_to_newid = dict()
 def loadDevice(device, projectEndpoint):
-    print(device)
-    requests.post(projectEndpoint + "/templates/" + device["template_id"], '{"x": ' + str(device["x"]) + ', "y": ' + str(device["y"]) + '}')
+    oldid_to_newid[device["node_id"]] = requests.post(projectEndpoint + "/templates/" + device["template_id"], '{"x": ' + str(device["x"]) + ', "y": ' + str(device["y"]) + '}').json()["node_id"]
 
 def startDevice(device, projectEndpoint):
     print(projectEndpoint + "/nodes/" + device["node_id"] + "/start")
@@ -236,7 +234,7 @@ def connectDevices(aktuellerLink, projectEndpoint):
     print(links[0])
     print(links[1])
 
-    print(requests.post(projectEndpoint + "/links", '{"nodes": [{"adapter_number": ' + str(links[0]["adapter_number"]) + ', "node_id": "' + str(links[0]["node_id"]) + '", "port_number": ' + str(links[0]["port_number"]) + '}, { "adapter_number": ' + str(links[1]["adapter_number"]) + ', "node_id": "' + str(links[1]["node_id"]) + '", "port_number": ' + str(links[1]["port_number"]) + '}]}').json())
+    print(requests.post(projectEndpoint + "/links", '{"nodes": [{"adapter_number": ' + str(links[0]["adapter_number"]) + ', "node_id": "' + str(oldid_to_newid[links[0]["node_id"]]) + '", "port_number": ' + str(links[0]["port_number"]) + '}, { "adapter_number": ' + str(links[1]["adapter_number"]) + ', "node_id": "' + str(oldid_to_newid[links[1]["node_id"]]) + '", "port_number": ' + str(links[1]["port_number"]) + '}]}').json())
 
 
 
@@ -286,7 +284,7 @@ def load(vmhost, projectName, path):
 
     for links in nodeLinks:
         print("Test123")
-        connectDevices(links,projectEndpoint)
+        connectDevices(links, projectEndpoint)
 
     threads = []
     for device in getDevices(projectEndpoint):
