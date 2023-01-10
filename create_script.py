@@ -20,7 +20,7 @@ def router_script_create(config):
             write = True
         elif line.startswith("!") and write is True:
             if in_int is True and shutdown_found is False:
-                output += " no shutdown\n"
+                output += "no shutdown\n"
             output += "exit\n\n"
             write = False
             in_int = False
