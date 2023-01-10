@@ -295,6 +295,9 @@ parser.add_argument('-vmhost', help="IP of the GNS-VM")
 parser.add_argument('-project', help="name of project")
 args = parser.parse_args()
 
+if args.vmhost is None:
+    args.vmhost = "127.0.0.1"
+
 if args.save is not None:
     save(args.vmhost, args.project, args.save)
 if args.load is not None:
