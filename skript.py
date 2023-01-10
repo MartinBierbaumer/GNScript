@@ -32,15 +32,106 @@ def getDevices(projectEndpoint):
 
 
 def setMode(telnet):
-    telnet.write(b"\n")
-    telnet.write(b"\n")
-    telnet.write(b"\n")
+    telnet.write(b"\r\n")
+    telnet.write(b"\r\n")
+    telnet.write(b"\r\n")
     time.sleep(1)
     telnet.write(b"\n")
     telnet.write(b"enable\n")
     telnet.write(b"conf t\n")
     telnet.write(b"end\n")
     telnet.write(b"terminal length 0\n")
+
+def router_script_create(config):
+    keywoards = ["ip", "interface", "router", "line"]
+    output = "en\nconf t\n"
+    write = False
+    ssh = False
+    shutdown_found = False
+    in_int = False
+
+    for line in config.split('\n'):
+        if not line.strip():
+            continue
+        elif line.startswith(keywoards[1]):
+            in_int = True
+            write = True
+        elif line.startswith(keywoards[2]) or \
+                line.startswith(keywoards[0] + " dhcp pool") or \
+                line.startswith(keywoards[0] + " access-list") or \
+                line.startswith(keywoards[3]):
+            write = True
+        elif line.startswith("!") and write is True:
+            if in_int is True and shutdown_found is False:
+                output += " no shutdown\n"
+            output += " exit\n"
+            write = False
+            in_int = False
+            shutdown_found = False
+        elif write is True:
+            if line.find("ssh") >= 0:
+                ssh = True
+            if line.find("shutdown") >= 0:
+                shutdown_found = True
+            output += line
+            continue
+        elif line.startswith("end"):
+            continue
+        output += line
+
+    if ssh is True:
+        output += "crypto key generate rsa modulus 1024 exportable\nend\n"
+
+    return output
+
+
+def getVlan(telnet):
+    vlans = []
+
+    telnet.write(b"show vlan brief\n")
+    data = telnet.read_until(b"end sequence", 2).decode('utf-8')
+    pattern = r'^(\d+)[\s]+([\S]+)[\s]+([\S]+)'
+
+    for line in data.split("\n"):
+        matches = re.finditer(pattern, line)
+
+        print(matches)
+
+        for match in matches:
+                vlans.append((match.group(1), match.group(2)))
+
+    return vlans
+
+def switch_script_creates(config, telnet):
+    vlans = getVlan(telnet)
+    lines = config.split("\n")
+    output = "en\nconf t\n"
+    write = False
+    ssh = False
+    for line in lines:
+        if not line.strip():
+            continue
+        elif (line.startswith("interface") or
+              line.startswith("line")):
+            write = True
+        elif write is True:
+            if line.find("ssh") >= 0:
+                ssh = True
+            if line.startswith("!"):
+                output += " exit\n"
+                write = False
+            output += line
+            continue
+        elif line.startswith("end"):
+            continue
+        output += line
+    for vlan in vlans:
+        if int(vlan[0]) not in [1002, 1003, 1004, 1005, 1]:
+            output += "vlan " + vlan[0] + "\nname " + vlan[1] + "\n"
+    output += "exit\n"
+    if ssh is True:
+        output += "crypto key generate rsa modulus 1024 exportable\nend\n"
+    return output
 
 
 def getRunning(telnet):
@@ -49,26 +140,7 @@ def getRunning(telnet):
     return telnet.read_until(b"!\r\nend", 30).decode('utf-8') + "\n"
 
 
-def getVlan(telnet, switch):
-    vlans = []
 
-    if (switch):
-        telnet.write(b"show vlan brief\n")
-        data = telnet.read_until(b"end sequence", 2).decode('utf-8')
-        pattern = r'^(\d+)[\s]+([\S]+)[\s]+([\S]+)'
-
-        for line in data.split("\n"):
-            matches = re.finditer(pattern, line)
-
-            print(matches)
-
-            for match in matches:
-                vlans.append((match.group(1), match.group(2), match.group(3)))
-
-        print(data)
-        print(vlans)
-
-    return "\n".join([f"vlan {vlan[0]}\nname {vlan[1]}" for vlan in vlans]) + "\n"
 
 
 def getKonfig(telnet, switch=True):
@@ -76,9 +148,13 @@ def getKonfig(telnet, switch=True):
 
     setMode(telnet)
     running = getRunning(telnet)
-    vlan = getVlan(telnet, switch)
 
-    return running + vlan
+    if switch:
+        konfig = switch_script_creates(running, telnet)
+    else:
+        konfig = router_script_create(running)
+
+    return konfig
 
 
 sw_hashes = ['14b981002e40b660f2d7400401e04c14', '8f14b50083a14688dec2fc791706bb3e']
@@ -169,10 +245,15 @@ def connectDevices(aktuellerLink, projectEndpoint):
 
 def writeDevice(device, vmhost, konfig):
     print(vmhost + " " + str(device['console']))
+
+    time.sleep(10)
+
     tel = telnetlib.Telnet(vmhost, device["console"])
-
-    time.sleep(180)
-
+    print(tel.read_until(b"Press RETURN to get started!", 300))
+    tel.write(b"\r\n")
+    print(tel.read_until(b"passed code signing verification", 300))
+    time.sleep(1)
+    tel.write(b"\r\n")
     tel.write(b"enable\n")
     tel.write(b"conf t\n")
     for line in konfig.split("\n"):
@@ -224,6 +305,9 @@ parser.add_argument('-load', help="loads the configuration")
 parser.add_argument('-vmhost', help="IP of the GNS-VM")
 parser.add_argument('-project', help="name of project")
 args = parser.parse_args()
+
+if args.vmhost is None:
+    args.vmhost = "127.0.0.1"
 
 if args.save is not None:
     save(args.vmhost, args.project, args.save)
