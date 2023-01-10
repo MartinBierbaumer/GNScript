@@ -81,6 +81,7 @@ def router_script_create(config):
 
     if ssh is True:
         output += "crypto key generate rsa modulus 1024 exportable\nend\n"
+
     return output
 
 
@@ -146,11 +147,12 @@ def getKonfig(telnet, switch=True):
     """retrieves the konfig and return it as a string"""
 
     setMode(telnet)
+    running = getRunning(telnet)
 
     if switch:
-        konfig = switch_script_creates(getRunning(telnet), telnet)
+        konfig = switch_script_creates(running, telnet)
     else:
-        konfig = router_script_create(getRunning(telnet))
+        konfig = router_script_create(running)
 
     return konfig
 
@@ -240,10 +242,15 @@ def connectDevices(nodeLinks, projectEndpoint):
 
 def writeDevice(device, vmhost, konfig):
     print(vmhost + " " + str(device['console']))
+
+    time.sleep(10)
+
     tel = telnetlib.Telnet(vmhost, device["console"])
-
-    time.sleep(180)
-
+    print(tel.read_until(b"Press RETURN to get started!", 300))
+    tel.write(b"\r\n")
+    print(tel.read_until(b"passed code signing verification", 300))
+    time.sleep(1)
+    tel.write(b"\r\n")
     tel.write(b"enable\n")
     tel.write(b"conf t\n")
     for line in konfig.split("\n"):
