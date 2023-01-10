@@ -63,8 +63,8 @@ def router_script_create(config):
             write = True
         elif line.startswith("!") and write is True:
             if in_int is True and shutdown_found is False:
-                output += "no shutdown\n"
-            output += "exit\n"
+                output += " no shutdown\n"
+            output += " exit\n"
             write = False
             in_int = False
             shutdown_found = False
@@ -117,7 +117,7 @@ def switch_script_creates(config, telnet):
             if line.find("ssh") >= 0:
                 ssh = True
             if line.startswith("!"):
-                output += "exit\n"
+                output += " exit\n"
                 write = False
             output += line
             continue
