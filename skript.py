@@ -154,10 +154,13 @@ def startDevice(device, projectEndpoint):
 def createProject(endPoint):
     requests.post(endPoint, '{"name": "' + args.project + '", "path": "C:\\\\Users\\\\Security\\\\GNS3\\\\projects\\\\' + args.project + '"}').json()
 
-def connectDevices(nodeLinks, projectEndpoint):
-    for link in getLinks(projectEndpoint):
-        device = link["nodes"]
-        print(requests.post(projectEndpoint + "/links", '{"nodes": [{"adapter_number": ' + str(device[0]["adapter_number"]) + ', "node_id": "' + str(device[0]["node_id"]) + '", "port_number": ' + str(device[0]["port_number"]) + '}, { "adapter_number": ' + str(device[1]["adapter_number"]) + ', "node_id": "' + str(device[1]["node_id"]) + '", "port_number": ' + str(device[1]["port_number"]) + '}]}').json())
+def connectDevices(aktuellerLink, projectEndpoint):
+    print(aktuellerLink)
+    links = aktuellerLink["nodes"]
+    print(links[0])
+    print(links[1])
+
+    print(requests.post(projectEndpoint + "/links", '{"nodes": [{"adapter_number": ' + str(links[0]["adapter_number"]) + ', "node_id": "' + str(links[0]["node_id"]) + '", "port_number": ' + str(links[0]["port_number"]) + '}, { "adapter_number": ' + str(links[1]["adapter_number"]) + ', "node_id": "' + str(links[1]["node_id"]) + '", "port_number": ' + str(links[1]["port_number"]) + '}]}').json())
 
 
 
@@ -201,6 +204,7 @@ def load(vmhost, projectName, path):
         loadDevice(device, projectEndpoint)
 
     for links in nodeLinks:
+        print("Test123")
         connectDevices(links,projectEndpoint)
 
     threads = []
