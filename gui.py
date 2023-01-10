@@ -62,10 +62,6 @@ def openPath(actionBox, pathButton):
     else:
         pathButton.setText(folder)
 
-
-
-
-
 def clickStart(startBox, configureBox):
     if startBox.isChecked():
         configureBox.setDisabled(False)
@@ -83,6 +79,8 @@ def checkAction(startBox, configureBox, actionBox, pathButton):
         configureBox.setChecked(False)
     else:
         startBox.setDisabled(False)
+        startBox.setChecked(True)
+        configureBox.setChecked(True)
 
 def getDisplayResolution():
     screens = []
@@ -147,7 +145,8 @@ def main():
 
     startBox = QCheckBox("Start Nodes", objectName="startBox")
     configureBox = QCheckBox("Configure Nodes", objectName="configureBox")
-    configureBox.setDisabled(True)
+    startBox.setChecked(True)
+    configureBox.setChecked(True)
 
     verticalSpacer = QSpacerItem(0, 0, QSizePolicy.Minimum, QSizePolicy.MinimumExpanding)
 
