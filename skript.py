@@ -1,3 +1,4 @@
+import platform
 import telnetlib
 import requests
 import time
@@ -226,7 +227,13 @@ def startDevice(device, projectEndpoint):
     requests.post(projectEndpoint + "/nodes/" + device["node_id"] + "/start", '{}')
 
 def createProject(endPoint):
-    requests.post(endPoint, '{"name": "' + args.project + '", "path": "C:\\\\Users\\\\Security\\\\GNS3\\\\projects\\\\' + args.project + '"}').json()
+    operatingSystem = platform.system()
+    user = os.getlogin()
+    if operatingSystem == "Windows":
+        defaultPath = "C:\\Users\\"+user+"\\GNS3\\projects"
+    elif operatingSystem == "Linux":
+        defaultPath = "/home/"+user+"/GNS3/projects"
+    requests.post(endPoint, '{"name": "' + args.project + '", "path": '+ defaultPath + args.project + '"}').json()
 
 def connectDevices(aktuellerLink, projectEndpoint):
     print(aktuellerLink)
