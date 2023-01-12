@@ -19,12 +19,12 @@ def getProjectEndpoint(host="localhost", port="3080", projectName=None):
     global endPoint
     endPoint = "http://" + host + ":" + port + "/v2/projects"
     r = requests.get(endPoint)
-    projectId = None
+    projectID = None
     for project in r.json():
         if project["name"] == projectName:
             projectID = project["project_id"]
 
-    if projectId is None:
+    if projectID is None:
         return None
     return endPoint + "/" + projectID
 
