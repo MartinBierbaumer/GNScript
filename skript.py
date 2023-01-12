@@ -220,7 +220,15 @@ def save(vmhost, projectName, path):
 
 oldid_to_newid = dict()
 def loadDevice(device, projectEndpoint):
-    oldid_to_newid[device["node_id"]] = requests.post(projectEndpoint + "/templates/" + device["template_id"], '{"x": ' + str(device["x"]) + ', "y": ' + str(device["y"]) + '}').json()["node_id"]
+    new_device = requests.post(projectEndpoint + "/templates/" + device["template_id"], '{"x": ' + str(device["x"]) + ', "y": ' + str(device["y"]) + '}').json()
+
+    url = f"{projectEndpoint}/nodes/" + new_device['node_id']
+
+    payload = {"name": device['name']}
+    requests.request("PUT", url, json=payload)
+    print(f"Changed Node name for Node {new_device['node_id']}! Response")
+
+    oldid_to_newid[device["node_id"]] = new_device["node_id"]
 
 def startDevice(device, projectEndpoint):
     print(projectEndpoint + "/nodes/" + device["node_id"] + "/start")
