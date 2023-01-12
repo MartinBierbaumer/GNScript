@@ -332,3 +332,5 @@ if args.save is not None:
 if args.load is not None:
     load(args.vmhost, args.project, args.load, args.start, args.configure)
 
+if args.save is None and args.load is None:
+    print('No action specified! Use -help for help')
