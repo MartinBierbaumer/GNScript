@@ -286,6 +286,7 @@ def createDevice(device, projectEndpoint, vmhost, konfig, start, configure):
     print(konfig)
 
     if start:
+        print(f"Starting Device {device['name']}")
         startDevice(device, projectEndpoint)
 
     if configure:
@@ -311,8 +312,13 @@ def load(vmhost, projectName, path, start, configure):
         print("Test123")
         connectDevices(links, projectEndpoint)
 
+    old_names = [dev['name'] for dev in data]
+
     threads = []
     for device in getDevices(projectEndpoint):
+        if not device['name'] in old_names:
+            print(f'Skipping Device, which only exists in target project {device["name"]}')
+            continue
         with open(path + "/skripts/" + device["name"] + ".skript") as f:
             thread = threading.Thread(target=createDevice, args=(device, projectEndpoint, vmhost, f.read(), start, configure))
             thread.start()
@@ -341,3 +347,4 @@ if args.load is not None:
 
 if args.save is None and args.load is None:
     print('No action specified! Use -help for help')
+
