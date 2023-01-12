@@ -19,9 +19,13 @@ def getProjectEndpoint(host="localhost", port="3080", projectName=None):
     global endPoint
     endPoint = "http://" + host + ":" + port + "/v2/projects"
     r = requests.get(endPoint)
+    projectId = None
     for project in r.json():
         if project["name"] == projectName:
             projectID = project["project_id"]
+
+    if projectId is None:
+        return None
     return endPoint + "/" + projectID
 
 
@@ -212,6 +216,9 @@ def save(vmhost, projectName, path):
         print('path exists')
 
     projectEndpoint = getProjectEndpoint(projectName=projectName)
+    if projectEndpoint is None:
+        print(f'Could not find Project "{projectName}"')
+        exit(2)
     saveKonfig(vmhost, projectEndpoint, path + "/skripts")
     savePhysical(vmhost, projectEndpoint, path)
 
