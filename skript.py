@@ -9,12 +9,12 @@ import json
 import re
 import logging
 
-#TODO logging, paths, match
+
+# TODO logging, paths, match
 
 
 def getProjectEndpoint(host="localhost", port="3080", projectName=None):
     """returns the GNS-API projectEndpoint"""
-
 
     global endPoint
     endPoint = "http://" + host + ":" + port + "/v2/projects"
@@ -42,6 +42,7 @@ def setMode(telnet):
     telnet.write(b"conf t\n")
     telnet.write(b"end\n")
     telnet.write(b"terminal length 0\n")
+
 
 def router_script_create(config):
     keywoards = ["ip", "interface", "router", "line"]
@@ -99,9 +100,10 @@ def getVlan(telnet):
         print(matches)
 
         for match in matches:
-                vlans.append((match.group(1), match.group(2)))
+            vlans.append((match.group(1), match.group(2)))
 
     return vlans
+
 
 def switch_script_creates(config, telnet):
     vlans = getVlan(telnet)
@@ -139,9 +141,6 @@ def getRunning(telnet):
     telnet.write(b"show run\n")
     telnet.read_until(b" bytes", 2)
     return telnet.read_until(b"!\r\nend", 30).decode('utf-8') + "\n"
-
-
-
 
 
 def getKonfig(telnet, switch=True):
@@ -193,6 +192,7 @@ def getLinks(projectEndpoint):
     links = requests.get(projectEndpoint + "/links")
     return links.json()
 
+
 def savePhysical(vmhost, projectEndpoint, path):
     """saves the physical config"""
 
@@ -219,6 +219,8 @@ def save(vmhost, projectName, path):
 
 
 oldid_to_newid = dict()
+
+
 def loadDevice(device, projectEndpoint):
     new_device = requests.post(projectEndpoint + "/templates/" + device["template_id"], '{"x": ' + str(device["x"]) + ', "y": ' + str(device["y"]) + '}').json()
 
@@ -230,18 +232,21 @@ def loadDevice(device, projectEndpoint):
 
     oldid_to_newid[device["node_id"]] = new_device["node_id"]
 
+
 def startDevice(device, projectEndpoint):
     print(projectEndpoint + "/nodes/" + device["node_id"] + "/start")
     requests.post(projectEndpoint + "/nodes/" + device["node_id"] + "/start", '{}')
+
 
 def createProject(endPoint):
     operatingSystem = platform.system()
     user = os.getlogin()
     if operatingSystem == "Windows":
-        defaultPath = "C:\\Users\\"+user+"\\GNS3\\projects"
+        defaultPath = "C:\\Users\\" + user + "\\GNS3\\projects"
     elif operatingSystem == "Linux":
-        defaultPath = "/home/"+user+"/GNS3/projects"
-    requests.post(endPoint, '{"name": "' + args.project + '", "path": '+ defaultPath + args.project + '"}').json()
+        defaultPath = "/home/" + user + "/GNS3/projects"
+    requests.post(endPoint, '{"name": "' + args.project + '", "path": ' + defaultPath + args.project + '"}').json()
+
 
 def connectDevices(aktuellerLink, projectEndpoint):
     print(aktuellerLink)
@@ -250,10 +255,6 @@ def connectDevices(aktuellerLink, projectEndpoint):
     print(links[1])
 
     print(requests.post(projectEndpoint + "/links", '{"nodes": [{"adapter_number": ' + str(links[0]["adapter_number"]) + ', "node_id": "' + str(oldid_to_newid[links[0]["node_id"]]) + '", "port_number": ' + str(links[0]["port_number"]) + '}, { "adapter_number": ' + str(links[1]["adapter_number"]) + ', "node_id": "' + str(oldid_to_newid[links[1]["node_id"]]) + '", "port_number": ' + str(links[1]["port_number"]) + '}]}').json())
-
-
-
-
 
 
 def writeDevice(device, vmhost, konfig):
@@ -330,3 +331,4 @@ if args.save is not None:
     save(args.vmhost, args.project, args.save)
 if args.load is not None:
     load(args.vmhost, args.project, args.load, args.start, args.configure)
+
