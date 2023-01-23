@@ -275,8 +275,6 @@ def writeDevice(device, vmhost, konfig):
     print(tel.read_until(b"passed code signing verification", 300))
     time.sleep(1)
     tel.write(b"\r\n")
-    tel.write(b"enable\n")
-    tel.write(b"conf t\n")
     for line in konfig.split("\n"):
         tel.write(str.encode(line + "\n"))
         time.sleep(0.05)
