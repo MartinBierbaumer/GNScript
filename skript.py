@@ -7,10 +7,6 @@ import os
 import argparse
 import json
 import re
-import logging
-
-
-# TODO logging, paths, match
 
 
 def getProjectEndpoint(host="localhost", port="3080", projectName=None):
@@ -58,6 +54,8 @@ def router_script_create(config):
 
     for line in config.split('\n'):
         if not line.strip():
+            continue
+        elif line.startswith('*'):
             continue
         elif line.startswith(keywoards[1]):
             in_int = True
@@ -117,6 +115,8 @@ def switch_script_creates(config, telnet):
     ssh = False
     for line in lines:
         if not line.strip():
+            continue
+        elif line.startswith('*'):
             continue
         elif (line.startswith("interface") or
               line.startswith("line")):
@@ -307,7 +307,6 @@ def load(vmhost, projectName, path, start, configure):
         loadDevice(device, projectEndpoint)
 
     for links in nodeLinks:
-        print("Test123")
         connectDevices(links, projectEndpoint)
 
     old_names = [dev['name'] for dev in data]
