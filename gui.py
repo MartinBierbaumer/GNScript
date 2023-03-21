@@ -186,6 +186,7 @@ if __name__ == '__main__':
     from sys import platform
     if 'win' in platform:
         import ctypes
+        import os
         SPI_SETDESKWALLPAPER = 20
-        ctypes.windll.user32.SystemParametersInfoA(SPI_SETDESKWALLPAPER, 0, "./logo prototype.svg", 0)
+        ctypes.windll.user32.SystemParametersInfoA(SPI_SETDESKWALLPAPER, 0, os.getcwd() + "/logo prototype.svg", 0)
     main()
