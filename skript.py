@@ -184,7 +184,7 @@ def saveKonfig(vmhost, projectEndpoint, path):
     threads = []
     for device in getDevices(projectEndpoint):
         print(device['properties']['hda_disk_image_md5sum'])
-        thread = threading.Thread(target=saveItem, args=(vmhost, device, path + "/" + device["node_id"] + ".skript"))
+        thread = threading.Thread(target=saveItem, args=(vmhost, device, path + "/" + device["name"] + ".skript"))
         thread.start()
         threads.append(thread)
 
@@ -311,14 +311,12 @@ def load(vmhost, projectName, path, start, configure):
 
     old_names = [dev['name'] for dev in data]
 
-    print(oldid_to_newid)
-
     threads = []
     for device in getDevices(projectEndpoint):
         if not device['name'] in old_names:
             print(f'Skipping Device, which only exists in target project {device["name"]}')
             continue
-        with open(path + "/skripts/" + oldid_to_newid[device["node_id"]] + ".skript") as f:
+        with open(path + "/skripts/" + device["name"] + ".skript") as f:
             thread = threading.Thread(target=createDevice, args=(device, projectEndpoint, vmhost, f.read(), start, configure))
             thread.start()
             threads.append(thread)
